@@ -1,0 +1,59 @@
+{
+  "app": {
+    "title": "Sách AR",
+    "subtitle": "Quét mã QR để xem video AR"
+  },
+  "language": {
+    "select": "Chọn Ngôn Ngữ",
+    "english": "Tiếng Anh",
+    "vietnamese": "Tiếng Việt"
+  },
+  "qr": {
+    "scanning": "Bắt đầu quét QR",
+    "instructions": "Hướng camera vào mã QR trên trang sách",
+    "success": "Quét mã QR thành công!",
+    "error": "Không thể quét mã QR. Vui lòng thử lại.",
+    "notFound": "Không tìm thấy trang. Vui lòng quét mã QR hợp lệ."
+  },
+  "ar": {
+    "loading": "Đang tải trải nghiệm AR...",
+    "loadingARjs": "Đang tải AR.js...",
+    "initializing": "Đang khởi tạo AR...",
+    "trainingMarker": "Đang train marker (lần đầu có thể mất 1-2 phút)",
+    "trainingHint": "Lần đầu tiên AR.js cần train marker image. Vui lòng đợi và giữ camera ổn định. Quá trình này chỉ diễn ra một lần.",
+    "loadingHint": "Đang tải các thư viện AR...",
+    "tracking": "Hướng camera vào hình ảnh trên trang sách",
+    "trackingLost": "Mất theo dõi. Vui lòng hướng camera lại vào trang sách.",
+    "trackingFound": "Đã tìm thấy! Video sẽ tự động phát."
+  },
+  "video": {
+    "loading": "Đang tải video...",
+    "play": "Phát",
+    "pause": "Tạm dừng",
+    "replay": "Phát lại",
+    "error": "Không thể tải video. Vui lòng kiểm tra kết nối."
+  },
+  "navigation": {
+    "back": "Quay lại",
+    "home": "Trang chủ",
+    "scanNew": "Quét Mã QR Mới"
+  },
+  "errors": {
+    "cameraPermission": "Quyền truy cập camera bị từ chối.",
+    "cameraNotAvailable": "Camera không khả dụng. Vui lòng sử dụng thiết bị có camera.",
+    "cameraInUse": "Camera đang được sử dụng bởi ứng dụng khác. Vui lòng đóng ứng dụng khác và thử lại.",
+    "videoLoadError": "Không thể tải video. Vui lòng thử lại.",
+    "aframeLoadError": "Không thể tải A-Frame. Vui lòng kiểm tra kết nối internet.",
+    "arjsLoadError": "Không thể tải AR.js. Vui lòng kiểm tra kết nối internet.",
+    "httpsRequired": "Camera yêu cầu HTTPS hoặc localhost. Trên iPhone, không thể dùng địa chỉ IP. Vui lòng dùng ngrok hoặc test trên máy tính.",
+    "howToFix": "Cách khắc phục:",
+    "fixStep1": "Kiểm tra biểu tượng camera trên thanh địa chỉ trình duyệt",
+    "fixStep2": "Nhấp vào biểu tượng và chọn 'Cho phép' truy cập camera",
+    "fixStep3": "Làm mới trang và thử lại",
+    "fixStepIPhone1": "Trên iPhone: Camera chỉ hoạt động với HTTPS",
+    "fixStepIPhone2": "Cài ngrok: npm install -g ngrok",
+    "fixStepIPhone3": "Chạy: ngrok http 3000 và dùng URL HTTPS từ ngrok",
+    "tryAgain": "Thử lại"
+  }
+}
+

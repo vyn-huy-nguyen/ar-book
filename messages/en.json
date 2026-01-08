@@ -1,0 +1,58 @@
+{
+  "app": {
+    "title": "AR Book",
+    "subtitle": "Scan QR code to view AR videos"
+  },
+  "language": {
+    "select": "Select Language",
+    "english": "English",
+    "vietnamese": "Vietnamese"
+  },
+  "qr": {
+    "scanning": "Start Scanning QR Code",
+    "instructions": "Point your camera at the QR code on the book page",
+    "success": "QR Code scanned successfully!",
+    "error": "Failed to scan QR code. Please try again.",
+    "notFound": "Page not found. Please scan a valid QR code."
+  },
+  "ar": {
+    "loading": "Loading AR experience...",
+    "loadingARjs": "Loading AR.js...",
+    "initializing": "Initializing AR...",
+    "trainingMarker": "Training marker (first time may take 1-2 minutes)",
+    "trainingHint": "AR.js needs to train the marker image for the first time. Please wait and keep camera steady. This only happens once.",
+    "loadingHint": "Loading AR libraries...",
+    "tracking": "Point camera at the image on the book page",
+    "trackingLost": "Tracking lost. Please point camera back at the book page.",
+    "trackingFound": "Tracking found! Video will play automatically."
+  },
+  "video": {
+    "loading": "Loading video...",
+    "play": "Play",
+    "pause": "Pause",
+    "replay": "Replay",
+    "error": "Failed to load video. Please check your connection."
+  },
+  "navigation": {
+    "back": "Back",
+    "home": "Home",
+    "scanNew": "Scan New QR Code"
+  },
+  "errors": {
+    "cameraPermission": "Camera permission denied.",
+    "cameraNotAvailable": "Camera not available. Please use a device with a camera.",
+    "cameraInUse": "Camera is being used by another application. Please close other apps and try again.",
+    "videoLoadError": "Failed to load video. Please try again.",
+    "aframeLoadError": "Failed to load A-Frame. Please check your internet connection.",
+    "arjsLoadError": "Failed to load AR.js. Please check your internet connection.",
+    "httpsRequired": "Camera requires HTTPS or localhost. On iPhone, IP address won't work. Please use ngrok or test on computer.",
+    "howToFix": "How to fix:",
+    "fixStep1": "Check the camera icon in your browser's address bar",
+    "fixStep2": "Click the icon and select 'Allow' camera access",
+    "fixStep3": "Refresh the page and try again",
+    "fixStepIPhone1": "On iPhone: Camera only works with HTTPS",
+    "fixStepIPhone2": "Install ngrok: npm install -g ngrok",
+    "fixStepIPhone3": "Run: ngrok http 3000 and use the HTTPS URL from ngrok",
+    "tryAgain": "Try Again"
+  }
+}
