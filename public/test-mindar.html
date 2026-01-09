@@ -1,0 +1,115 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MindAR Test</title>
+    <!-- Dependencies -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    
+    <style>
+       html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      
+      /* UI Overlay for Play button */
+      #ui-layer {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        padding-bottom: 50px;
+      }
+      
+      #play-btn {
+        background: rgba(255, 255, 255, 0.8);
+        border: none;
+        padding: 15px 30px;
+        border-radius: 30px;
+        font-size: 18px;
+        font-weight: bold;
+        pointer-events: auto;
+        display: none; /* Hidden by default */
+      }
+    </style>
+    
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const sceneEl = document.querySelector('a-scene');
+        const arSystem = sceneEl.systems["mindar-image-system"];
+        const video = document.querySelector("#vid");
+        const playBtn = document.querySelector("#play-btn");
+        
+        // Auto-play muted on load
+        video.muted = true;
+        
+        // UI Logic
+        const target = document.querySelector('#target-entity');
+        
+        target.addEventListener("targetFound", event => {
+          console.log("MindAR: Target Found");
+          playBtn.style.display = 'block';
+          video.play();
+        });
+
+        target.addEventListener("targetLost", event => {
+          console.log("MindAR: Target Lost");
+          playBtn.style.display = 'none';
+          video.pause();
+        });
+        
+        // Unmute button logic
+        playBtn.addEventListener('click', () => {
+            video.muted = !video.muted;
+            playBtn.innerText = video.muted ? "🔇 Unmute" : "🔊 Mute";
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <!-- 
+        MindAR Scene 
+        imageTargetSrc: path to the compiled .mind file 
+    -->
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001;" 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+      
+      <a-assets>
+        <!-- Video Asset - Added autoplay muted for safety -->
+        <video id="vid" src="./videos/page1-video-vi.mp4" loop="true" crossorigin="anonymous" playsinline webkit-playsinline autoplay muted></video>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Target Index 0 (First image in targets.mind) -->
+      <a-entity id="target-entity" mindar-image-target="targetIndex: 0">
+        <!-- Video Plane (16:9 aspect ratio) -->
+        <a-video src="#vid" width="1" height="0.5625" position="0 0 0" rotation="0 0 0"></a-video>
+      </a-entity>
+    </a-scene>
+    
+    <div id="ui-layer">
+        <button id="play-btn">🔇 Unmute</button>
+    </div>
+    
+    <script>
+       // Global click to unlock audio context/video autoplay policies
+       document.body.addEventListener('click', () => {
+         const v = document.querySelector("#vid");
+         if(v) v.play();
+       }, {once: true});
+    </script>
+  </body>
+</html>

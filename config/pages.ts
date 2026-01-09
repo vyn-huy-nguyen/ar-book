@@ -6,6 +6,7 @@
 export interface PageConfig {
   pageId: number;
   markerImage: string;
+  targetIndex: number; // Index in targets.mind file
   videos: {
     en: string;
     vi: string;
@@ -20,6 +21,7 @@ export const pagesConfig: Record<number, PageConfig> = {
   1: {
     pageId: 1,
     markerImage: '/markers/page1-marker.png',
+    targetIndex: 0,
     videos: {
       en: '/videos/page1-video-en.mp4',
       vi: '/videos/page1-video-vi.mp4',
@@ -32,6 +34,7 @@ export const pagesConfig: Record<number, PageConfig> = {
   2: {
     pageId: 2,
     markerImage: '/markers/page2-marker.jpg',
+    targetIndex: 1,
     videos: {
       en: '/videos/page2-video-en.mp4',
       vi: '/videos/page2-video-vi.mp4',
@@ -44,6 +47,7 @@ export const pagesConfig: Record<number, PageConfig> = {
   3: {
     pageId: 3,
     markerImage: '/markers/page3-marker.jpg',
+    targetIndex: 2,
     videos: {
       en: '/videos/page3-video-en.mp4',
       vi: '/videos/page3-video-vi.mp4',
@@ -56,6 +60,7 @@ export const pagesConfig: Record<number, PageConfig> = {
   4: {
     pageId: 4,
     markerImage: '/markers/page4-marker.jpg',
+    targetIndex: 3,
     videos: {
       en: '/videos/page4-video-en.mp4',
       vi: '/videos/page4-video-vi.mp4',
@@ -80,4 +85,3 @@ export function getPageConfig(pageId: number): PageConfig | null {
 export function getAllPagesConfig(): Record<number, PageConfig> {
   return pagesConfig;
 }
-

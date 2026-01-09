@@ -2,15 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
 /* Ant Design overrides */
 .ant-layout {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* AR Scene styles */
 #ar-scene {
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Force AR.js elements to fill screen */
+.a-canvas,
+video {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  object-fit: cover !important;
+  z-index: 0 !important;
+  margin: 0 !important;
 }
 
 /* Custom scrollbar */
@@ -31,4 +61,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
-

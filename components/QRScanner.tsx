@@ -33,7 +33,7 @@ export default function QRScanner({ onScanSuccess, onBack }: QRScannerProps) {
   const startScanning = async () => {
     try {
       setError(null);
-      
+
       // Check if mediaDevices is available
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setError(t('errors.cameraNotAvailable'));
@@ -41,7 +41,11 @@ export default function QRScanner({ onScanSuccess, onBack }: QRScannerProps) {
       }
 
       // Check if we're in a secure context (HTTPS or localhost)
-      const isSecureContext = window.isSecureContext || location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      const isSecureContext =
+        window.isSecureContext ||
+        location.protocol === 'https:' ||
+        location.hostname === 'localhost' ||
+        location.hostname === '127.0.0.1';
       if (!isSecureContext) {
         setError(t('errors.httpsRequired'));
         return;
@@ -64,7 +68,7 @@ export default function QRScanner({ onScanSuccess, onBack }: QRScannerProps) {
       }
     } catch (err: any) {
       console.error('Error accessing camera:', err);
-      
+
       // Handle different error types
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         setError(t('errors.cameraPermission'));
@@ -152,9 +156,9 @@ export default function QRScanner({ onScanSuccess, onBack }: QRScannerProps) {
   };
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
+    <div className="relative h-dvh w-full overflow-hidden bg-black">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/70 to-transparent p-4">
+      <div className="absolute left-0 right-0 top-0 z-10 bg-gradient-to-b from-black/70 to-transparent p-4">
         <div className="flex items-center gap-4">
           <Button
             type="text"
@@ -163,59 +167,47 @@ export default function QRScanner({ onScanSuccess, onBack }: QRScannerProps) {
               stopScanning();
               onBack();
             }}
-            className="text-white"
+            className="flex h-10 items-center px-4 text-white"
           >
             {t('navigation.back')}
           </Button>
-          <h2 className="text-white text-lg font-semibold flex-1">
-            {t('qr.scanning')}
-          </h2>
+          <h2 className="flex-1 text-lg font-semibold text-white">{t('qr.scanning')}</h2>
         </div>
       </div>
 
       {/* Video */}
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        className="w-full h-full object-cover"
-      />
+      <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover" />
 
       {/* Hidden canvas for QR processing */}
       <canvas ref={canvasRef} className="hidden" />
 
       {/* Overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <div className="w-64 h-64 border-4 border-primary-500 rounded-xl shadow-lg relative">
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <div className="relative h-64 w-64 rounded-xl border-4 border-primary-500 shadow-lg">
           {/* Corner indicators */}
-          <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-primary-500 rounded-tl-lg" />
-          <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-primary-500 rounded-br-lg" />
+          <div className="absolute -left-1 -top-1 h-8 w-8 rounded-tl-lg border-l-4 border-t-4 border-primary-500" />
+          <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-br-lg border-b-4 border-r-4 border-primary-500" />
         </div>
-        <p className="mt-8 text-white text-center px-4 text-sm drop-shadow-lg">
+        <p className="mt-8 px-4 text-center text-sm text-white drop-shadow-lg">
           {t('qr.instructions')}
         </p>
       </div>
 
       {/* Error message */}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <Alert
-              message={error}
-              type="error"
-              showIcon
-              className="mb-4"
-            />
-            <div className="space-y-2 text-sm text-gray-600 mb-4">
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6">
+            <Alert message={error} type="error" showIcon className="mb-4" />
+            <div className="mb-4 space-y-2 text-sm text-gray-600">
               <p className="font-semibold">{t('errors.howToFix')}:</p>
               {error === t('errors.httpsRequired') ? (
-                <ul className="list-disc list-inside space-y-1 ml-2">
+                <ul className="ml-2 list-inside list-disc space-y-1">
                   <li>{t('errors.fixStepIPhone1')}</li>
                   <li>{t('errors.fixStepIPhone2')}</li>
                   <li>{t('errors.fixStepIPhone3')}</li>
                 </ul>
               ) : (
-                <ul className="list-disc list-inside space-y-1 ml-2">
+                <ul className="ml-2 list-inside list-disc space-y-1">
                   <li>{t('errors.fixStep1')}</li>
                   <li>{t('errors.fixStep2')}</li>
                   <li>{t('errors.fixStep3')}</li>
@@ -243,11 +235,10 @@ export default function QRScanner({ onScanSuccess, onBack }: QRScannerProps) {
 
       {/* Loading spinner */}
       {!isScanning && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
           <Spin size="large" />
         </div>
       )}
     </div>
   );
 }
-
