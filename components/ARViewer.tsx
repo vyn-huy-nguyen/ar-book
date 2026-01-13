@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import Script from 'next/script';
 import { Button, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -16,11 +16,12 @@ export default function ARViewer({ onBack }: ARViewerProps) {
 
   const [activePageId, setActivePageId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false); // Default to unmute
+  const [isMuted, setIsMuted] = useState(true);
   const [trackingStatus, setTrackingStatus] = useState<'tracking' | 'found' | 'lost'>('tracking');
   const [scriptsLoaded, setScriptsLoaded] = useState({ aframe: false, mindar: false });
+  const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
-  const allPages = Object.values(pagesConfig);
+  const allPages = useMemo(() => Object.values(pagesConfig), []);
 
   // Refs for media
   const audioRefs = useRef<Record<number, HTMLAudioElement | null>>({});
@@ -64,14 +65,64 @@ export default function ARViewer({ onBack }: ARViewerProps) {
   }, [scriptsLoaded.aframe, scriptsLoaded.mindar]);
 
   const activePageIdRef = useRef<number | null>(null);
-  const isMutedRef = useRef(isMuted);
+  const isMutedRef = useRef<boolean>(false);
+  const trackingStatusRef = useRef<'tracking' | 'found' | 'lost'>('tracking');
 
-  // Removed useEffect for activePageIdRef to avoid state update lag
-  // We will update ref manually in targetFound for immediate availability
+  useEffect(() => {
+    activePageIdRef.current = activePageId;
+  }, [activePageId]);
 
   useEffect(() => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
+
+  useEffect(() => {
+    trackingStatusRef.current = trackingStatus;
+  }, [trackingStatus]);
+
+  // CENTRALIZED MEDIA SYNC LOGIC
+  // This ensure media elements always match the React state.
+  useEffect(() => {
+    if (!scriptsLoaded.aframe || !scriptsLoaded.mindar) return;
+
+    allPages.forEach((p) => {
+      const v = videoRefs.current[p.pageId];
+      const a = audioRefs.current[p.pageId];
+      const isActive = activePageId === p.pageId && trackingStatus === 'found';
+
+      if (v) {
+        if (isActive && isPlaying) {
+          // Play immediately (visuals), but enforce mute if not unlocked yet
+          const shouldBeMuted = !isAudioUnlocked || isMuted;
+          if (v.muted !== shouldBeMuted) v.muted = shouldBeMuted;
+          if (v.paused) v.play().catch(() => {});
+        } else {
+          if (!v.paused) v.pause();
+          v.muted = true;
+        }
+      }
+      if (a) {
+        // Audio respects the same logic but visuals-priority: only play if no video
+        if (isActive && isPlaying && !v) {
+          const shouldBeMuted = !isAudioUnlocked || isMuted;
+          if (a.muted !== shouldBeMuted) a.muted = shouldBeMuted;
+          if (a.paused) a.play().catch(() => {});
+        } else {
+          if (!a.paused) a.pause();
+          a.muted = true;
+        }
+      }
+    });
+  }, [
+    activePageId,
+    trackingStatus,
+    isPlaying,
+    isMuted,
+    isAudioUnlocked,
+    allPages,
+    scriptsLoaded,
+    locale,
+  ]);
 
   const setupEvents = () => {
     allPages.forEach((page) => {
@@ -80,182 +131,77 @@ export default function ARViewer({ onBack }: ARViewerProps) {
 
       target.addEventListener('targetFound', () => {
         console.log(`MindAR: Found target ${page.pageId}`);
-        const previousPageId = activePageIdRef.current; // Use ref to get previous state
-        const currentMuted = isMutedRef.current; // Use ref to get fresh mute state
+        const previousPageId = activePageIdRef.current;
 
-        // IMMEDIATE UPDATE: Update ref immediately to prevent race conditions with targetLost
-        activePageIdRef.current = page.pageId;
+        // Reset to beginning only if switching markers
+        if (previousPageId !== null && previousPageId !== page.pageId) {
+          console.log(
+            `Switching from marker ${previousPageId} to ${page.pageId}. Resetting all media.`
+          );
+          allPages.forEach((p) => {
+            const v = videoRefs.current[p.pageId];
+            const a = audioRefs.current[p.pageId];
+            if (v) v.currentTime = 0;
+            if (a) a.currentTime = 0;
+          });
+        }
 
         setTrackingStatus('found');
         setActivePageId(page.pageId);
-
-        // IMPORTANT: Pause and reset all other media first
-        allPages.forEach((otherPage) => {
-          if (otherPage.pageId !== page.pageId) {
-            // Pause other videos and reset to beginning
-            const otherVid = videoRefs.current[otherPage.pageId];
-            if (otherVid && !otherVid.paused) {
-              otherVid.pause();
-              otherVid.currentTime = 0;
-            }
-            // Pause other audio and reset to beginning
-            const otherAudio = audioRefs.current[otherPage.pageId];
-            if (otherAudio && !otherAudio.paused) {
-              otherAudio.pause();
-              otherAudio.currentTime = 0;
-            }
-          }
-        });
-
-        // Now play the current marker's media
-        // Priority: video > audio
-        const vid = videoRefs.current[page.pageId];
-        const audio = audioRefs.current[page.pageId];
-
-        // Logic check:
-        // 1. First time scan (previousPageId === null) -> Reset to beginning
-        // 2. Switch marker (previousPageId !== page.pageId) -> Reset to beginning
-        // 3. Same marker re-scan (previousPageId === page.pageId) -> Continue (do nothing)
-
-        const isSwitchingMarker = previousPageId !== null && previousPageId !== page.pageId;
-        const isFirstScan = previousPageId === null;
-        const shouldResetToBeginning = isSwitchingMarker || isFirstScan;
-
-        if (vid) {
-          if (shouldResetToBeginning) {
-            vid.currentTime = 0;
-          }
-          vid.muted = currentMuted;
-          vid
-            .play()
-            .then(() => {
-              setIsPlaying(true);
-            })
-            .catch((e) => {
-              console.log('Autoplay blocked, falling back to muted:', e);
-              // Fallback: Mute and try again
-              vid.muted = true;
-              vid
-                .play()
-                .then(() => {
-                  setIsMuted(true); // Update UI to show muted
-                  setIsPlaying(true);
-                })
-                .catch((e2) => console.log('Muted play also failed:', e2));
-            });
-        } else if (audio) {
-          console.log(`Trying to play audio for page ${page.pageId}:`, audio);
-          if (shouldResetToBeginning) {
-            audio.currentTime = 0;
-          }
-          audio.muted = currentMuted;
-          audio
-            .play()
-            .then(() => {
-              setIsPlaying(true);
-            })
-            .catch((e) => {
-              console.log('Audio autoplay blocked:', e);
-              // For audio-only, silent play is useless, but we can't do much.
-              // Still try creating a user gesture opportunity?
-              // Just fallback to muted so it "plays" (progress moves) or just stop?
-              // Better to respect standard behavior: fallback to muted so logic stays consistent
-              audio.muted = true;
-              audio
-                .play()
-                .then(() => {
-                  setIsMuted(true);
-                  setIsPlaying(true);
-                })
-                .catch((e2) => console.log('Audio muted play failed:', e2));
-            });
-        }
+        setIsPlaying(true);
       });
 
       target.addEventListener('targetLost', () => {
         console.log(`MindAR: Lost target ${page.pageId}`);
-
-        // Race condition fix:
-        // If we switched to Marker B (Found B) BEFORE Marker A Lost event fires,
-        // activePageIdRef.current will be B.
-        // We should ONLY update global state (trackingStatus, isPlaying) if the lost marker THIS marker (A)
-        const currentActiveId = activePageIdRef.current;
-
-        if (currentActiveId === page.pageId) {
-          setTrackingStatus('lost');
-        }
-
-        const vid = videoRefs.current[page.pageId];
-        const audio = audioRefs.current[page.pageId];
-
-        // Ensure media is paused regardless of active state
-        if (vid && !vid.paused) {
-          vid.pause();
-          // Only update isPlaying if this was the active page
-          if (currentActiveId === page.pageId) {
-            setIsPlaying(false);
-          }
-        } else if (audio && !audio.paused) {
-          audio.pause();
-          // Only update isPlaying if this was the active page
-          if (currentActiveId === page.pageId) {
-            setIsPlaying(false);
-          }
-        }
+        setTrackingStatus('lost');
+        setIsPlaying(false);
       });
     });
 
-    // Unlock audio on body click (iOS constraint)
+    // Unlock all media elements for mobile browsers on first interaction
     const unlockAudio = () => {
-      if (!activePageId) return;
-      const page = pagesConfig[activePageId];
-      if (!page) return;
+      console.log('Unlocking all media elements silently...');
 
-      if (page.model) {
-        const audio = audioRefs.current[page.pageId];
-        if (audio && isPlaying) audio.play();
-      } else {
-        const vid = videoRefs.current[page.pageId];
-        if (vid && isPlaying) vid.play();
-      }
+      const promises = allPages.map((p) => {
+        const v = videoRefs.current[p.pageId];
+        const a = audioRefs.current[p.pageId];
+        const mediaPromises = [];
+
+        if (v) {
+          v.muted = true;
+          mediaPromises.push(
+            v
+              .play()
+              .then(() => v.pause())
+              .catch(() => {})
+          );
+        }
+        if (a) {
+          a.muted = true;
+          mediaPromises.push(
+            a
+              .play()
+              .then(() => a.pause())
+              .catch(() => {})
+          );
+        }
+        return Promise.all(mediaPromises);
+      });
+
+      Promise.all(promises).then(() => {
+        console.log('System: All media unlocked and pre-warmed.');
+        setIsAudioUnlocked(true);
+      });
     };
     document.body.addEventListener('click', unlockAudio, { once: true });
   };
 
   const togglePlay = () => {
-    if (!activePageId) return;
-    const page = pagesConfig[activePageId];
-    if (!page) return;
-
-    const vid = videoRefs.current[page.pageId];
-    const audio = audioRefs.current[page.pageId];
-
-    if (vid) {
-      if (isPlaying) vid.pause();
-      else vid.play();
-      setIsPlaying(!isPlaying);
-    } else if (audio) {
-      if (isPlaying) audio.pause();
-      else audio.play();
-      setIsPlaying(!isPlaying);
-    }
+    setIsPlaying(!isPlaying);
   };
 
   const toggleMute = () => {
-    if (!activePageId) return;
-    const page = pagesConfig[activePageId];
-    if (!page) return;
-
-    const vid = videoRefs.current[page.pageId];
-    const audio = audioRefs.current[page.pageId];
-
-    if (vid) {
-      vid.muted = !isMuted;
-      setIsMuted(!isMuted);
-    } else if (audio) {
-      audio.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
+    setIsMuted(!isMuted);
   };
 
   return (
@@ -308,17 +254,10 @@ export default function ARViewer({ onBack }: ARViewerProps) {
           {scriptsLoaded.aframe &&
             scriptsLoaded.mindar &&
             allPages.map((page) => {
-              // CHANGE 2: Use single video for both languages (prefer 'vi', fallback to 'en')
-              const rawVideoUrl = page?.videos?.[locale as 'en' | 'vi'] || page?.videos?.vi;
-
-              const rawAudioUrl = page.audio
+              const videoUrl = page?.videos?.[locale as 'en' | 'vi'] || page?.videos?.vi;
+              const audioUrl = page.audio
                 ? page.audio[locale as 'en' | 'vi'] || page.audio.vi
                 : null;
-
-              // Add cache buster to prevent stale media
-              const timestamp = new Date().getTime();
-              const videoUrl = rawVideoUrl ? `${rawVideoUrl}?t=${timestamp}` : null;
-              const audioUrl = rawAudioUrl ? `${rawAudioUrl}?t=${timestamp}` : null;
 
               return (
                 <div key={page.pageId}>
@@ -337,6 +276,7 @@ export default function ARViewer({ onBack }: ARViewerProps) {
                       loop
                       crossOrigin="anonymous"
                       playsInline
+                      preload="auto"
                       muted
                       ref={(el) => {
                         videoRefs.current[page.pageId] = el;

@@ -5,16 +5,19 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin', 'vietnamese'] });
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'AR Book - Multi-language AR Video Experience',
   description: 'Scan QR code to view augmented reality videos in multiple languages',
+  other: {
+    'cache-control': 'no-cache, no-store, must-revalidate',
+    pragma: 'no-cache',
+    expires: '0',
+  },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
       <body className={inter.className}>
