@@ -12,7 +12,7 @@ if [ ! -f "marker.fset" ] || [ ! -f "marker.fset3" ] || [ ! -f "marker.iset" ]; 
     echo ""
     echo "📝 Steps:"
     echo "1. Go to: https://ar-js-org.github.io/AR.js/three.js/examples/nft.html"
-    echo "2. Upload page1-marker.png"
+    echo "2. Upload page1-marker.jpg"
     echo "3. Download the 3 files (marker.fset, marker.fset3, marker.iset)"
     echo "4. Place them in this directory"
     echo "5. Run this script again"

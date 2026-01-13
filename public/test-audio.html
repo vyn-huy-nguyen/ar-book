@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Audio Loading</title>
+  </head>
+  <body>
+    <h1>Audio Test for Page 2</h1>
+
+    <h2>Vietnamese Audio</h2>
+    <audio controls preload="auto" id="audio-vi">
+      <source src="/audio/page2-audio-vi.mp3" type="audio/mpeg" />
+    </audio>
+    <button onclick="testPlayVi()">Test Play VI</button>
+
+    <h2>English Audio</h2>
+    <audio controls preload="auto" id="audio-en">
+      <source src="/audio/page2-audio-en.mp3" type="audio/mpeg" />
+    </audio>
+    <button onclick="testPlayEn()">Test Play EN</button>
+
+    <div id="log" style="margin-top: 20px; padding: 10px; background: #f0f0f0"></div>
+
+    <script>
+      const log = document.getElementById('log');
+
+      function addLog(message) {
+        const p = document.createElement('p');
+        p.textContent = new Date().toLocaleTimeString() + ': ' + message;
+        log.appendChild(p);
+      }
+
+      function testPlayVi() {
+        const audio = document.getElementById('audio-vi');
+        addLog('Attempting to play Vietnamese audio...');
+        audio
+          .play()
+          .then(() => addLog('✅ Vietnamese audio playing'))
+          .catch((e) => addLog('❌ Error: ' + e.message));
+      }
+
+      function testPlayEn() {
+        const audio = document.getElementById('audio-en');
+        addLog('Attempting to play English audio...');
+        audio
+          .play()
+          .then(() => addLog('✅ English audio playing'))
+          .catch((e) => addLog('❌ Error: ' + e.message));
+      }
+
+      // Auto-test on load
+      window.addEventListener('load', () => {
+        addLog('Page loaded');
+        const audioVi = document.getElementById('audio-vi');
+        const audioEn = document.getElementById('audio-en');
+
+        audioVi.addEventListener('loadeddata', () => addLog('✅ VI audio loaded'));
+        audioVi.addEventListener('error', (e) => addLog('❌ VI audio error: ' + e.message));
+
+        audioEn.addEventListener('loadeddata', () => addLog('✅ EN audio loaded'));
+        audioEn.addEventListener('error', (e) => addLog('❌ EN audio error: ' + e.message));
+      });
+    </script>
+  </body>
+</html>

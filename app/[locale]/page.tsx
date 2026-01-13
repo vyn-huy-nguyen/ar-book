@@ -5,44 +5,25 @@ import { useTranslations } from 'next-intl';
 import { Button, Card, Space, Typography } from 'antd';
 import { ScanOutlined, GlobalOutlined } from '@ant-design/icons';
 import LanguageSelector from '@/components/LanguageSelector';
-import QRScanner from '@/components/QRScanner';
 import ARViewer from '@/components/ARViewer';
-import type { PageConfig } from '@/config/pages';
 
 const { Title, Paragraph } = Typography;
 
 export default function HomePage() {
   const t = useTranslations();
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'scanner' | 'ar'>('home');
-  const [currentPageConfig, setCurrentPageConfig] = useState<PageConfig | null>(null);
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'ar'>('home');
 
   const handleStartScanning = () => {
-    setCurrentScreen('scanner');
-  };
-
-  const handleQRScanSuccess = (pageConfig: PageConfig) => {
-    setCurrentPageConfig(pageConfig);
     setCurrentScreen('ar');
   };
 
   const handleBack = () => {
     setCurrentScreen('home');
-    setCurrentPageConfig(null);
+    window.location.reload();
   };
 
-  const handleScanNew = () => {
-    setCurrentScreen('scanner');
-    setCurrentPageConfig(null);
-  };
-
-  if (currentScreen === 'scanner') {
-    return <QRScanner onScanSuccess={handleQRScanSuccess} onBack={handleBack} />;
-  }
-
-  if (currentScreen === 'ar' && currentPageConfig) {
-    return (
-      <ARViewer pageConfig={currentPageConfig} onBack={handleBack} onScanNew={handleScanNew} />
-    );
+  if (currentScreen === 'ar') {
+    return <ARViewer onBack={handleBack} />;
   }
 
   return (
@@ -57,7 +38,6 @@ export default function HomePage() {
             <Title level={1} className="!mb-2 !text-primary-600">
               {t('app.title')}
             </Title>
-            <Paragraph className="text-gray-600">{t('app.subtitle')}</Paragraph>
           </div>
 
           <Button

@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "Sách AR",
-    "subtitle": "Quét mã QR để xem video AR"
+    "subtitle": "Hướng camera vào trang sách để xem nội dung AR"
   },
   "language": {
     "select": "Chọn Ngôn Ngữ",
@@ -9,11 +9,11 @@
     "vietnamese": "Tiếng Việt"
   },
   "qr": {
-    "scanning": "Bắt đầu quét QR",
-    "instructions": "Hướng camera vào mã QR trên trang sách",
-    "success": "Quét mã QR thành công!",
-    "error": "Không thể quét mã QR. Vui lòng thử lại.",
-    "notFound": "Không tìm thấy trang. Vui lòng quét mã QR hợp lệ."
+    "scanning": "Bắt đầu trải nghiệm AR",
+    "instructions": "Hướng camera vào hình ảnh đánh dấu trên trang sách",
+    "success": "Phát hiện marker thành công!",
+    "error": "Không thể phát hiện marker. Vui lòng thử lại.",
+    "notFound": "Không tìm thấy trang. Vui lòng quét marker hợp lệ."
   },
   "ar": {
     "loading": "Đang tải trải nghiệm AR...",
@@ -36,7 +36,7 @@
   "navigation": {
     "back": "Quay lại",
     "home": "Trang chủ",
-    "scanNew": "Quét Mã QR Mới"
+    "scanNew": "Quét Marker Mới"
   },
   "errors": {
     "cameraPermission": "Quyền truy cập camera bị từ chối.",

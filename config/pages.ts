@@ -7,7 +7,12 @@ export interface PageConfig {
   pageId: number;
   markerImage: string;
   targetIndex: number; // Index in targets.mind file
-  videos: {
+  videos?: {
+    en: string;
+    vi: string;
+  };
+  model?: string;
+  audio?: {
     en: string;
     vi: string;
   };
@@ -20,10 +25,10 @@ export interface PageConfig {
 export const pagesConfig: Record<number, PageConfig> = {
   1: {
     pageId: 1,
-    markerImage: '/markers/page1-marker.png',
+    markerImage: '/markers/page1-marker.jpg',
     targetIndex: 0,
     videos: {
-      en: '/videos/page1-video-en.mp4',
+      en: '/videos/page1-video-vi.mp4',
       vi: '/videos/page1-video-vi.mp4',
     },
     title: {
@@ -35,9 +40,12 @@ export const pagesConfig: Record<number, PageConfig> = {
     pageId: 2,
     markerImage: '/markers/page2-marker.jpg',
     targetIndex: 1,
-    videos: {
-      en: '/videos/page2-video-en.mp4',
-      vi: '/videos/page2-video-vi.mp4',
+    // Temporarily disabled model for testing
+    // model:
+    //   'https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/softmind/scene.gltf',
+    audio: {
+      en: '/audio/page2-audio-en.mp3',
+      vi: '/audio/page2-audio-vi.mp3',
     },
     title: {
       en: 'Page 2 - Chapter One',
@@ -49,25 +57,12 @@ export const pagesConfig: Record<number, PageConfig> = {
     markerImage: '/markers/page3-marker.jpg',
     targetIndex: 2,
     videos: {
-      en: '/videos/page3-video-en.mp4',
+      en: '/videos/page3-video-vi.mp4',
       vi: '/videos/page3-video-vi.mp4',
     },
     title: {
       en: 'Page 3 - Chapter Two',
       vi: 'Trang 3 - Chương Hai',
-    },
-  },
-  4: {
-    pageId: 4,
-    markerImage: '/markers/page4-marker.jpg',
-    targetIndex: 3,
-    videos: {
-      en: '/videos/page4-video-en.mp4',
-      vi: '/videos/page4-video-vi.mp4',
-    },
-    title: {
-      en: 'Page 4 - Conclusion',
-      vi: 'Trang 4 - Kết luận',
     },
   },
 };

@@ -18,7 +18,8 @@
 ## 📦 Cài Đặt
 
 ### Yêu Cầu
-- Node.js 18+ 
+
+- Node.js 18+
 - npm hoặc yarn
 
 ### Bước 1: Install Dependencies
@@ -32,13 +33,15 @@ npm install
 Đặt các file vào thư mục `public/`:
 
 **Videos** (`public/videos/`):
+
 - `page1-video-en.mp4`, `page1-video-vi.mp4`
 - `page2-video-en.mp4`, `page2-video-vi.mp4`
 - `page3-video-en.mp4`, `page3-video-vi.mp4`
 - `page4-video-en.mp4`, `page4-video-vi.mp4`
 
 **Marker Images** (`public/markers/`):
-- `page1-marker.png`
+
+- `page1-marker.jpg`
 - `page2-marker.jpg`
 - `page3-marker.jpg`
 - `page4-marker.jpg`
@@ -115,10 +118,12 @@ ar-book/
 ## 🌐 Đa Ngôn Ngữ
 
 Ứng dụng hỗ trợ 2 ngôn ngữ:
+
 - Tiếng Việt (vi) - Default
 - Tiếng Anh (en)
 
 URL structure:
+
 - `/vi` - Tiếng Việt
 - `/en` - Tiếng Anh
 
@@ -131,17 +136,20 @@ URL structure:
 ## 📝 Code Quality
 
 ### ESLint
+
 ```bash
 npm run lint
 ```
 
 ### Prettier
+
 ```bash
 npm run format        # Format all files
 npm run format:check  # Check formatting
 ```
 
 ### TypeScript
+
 ```bash
 npm run type-check
 ```
@@ -149,25 +157,31 @@ npm run type-check
 ## 🔧 Configuration
 
 ### Pages Config
+
 Chỉnh sửa `config/pages.ts` để cấu hình:
+
 - Marker images
 - Video URLs
 - Page titles
 
 ### i18n
+
 Thêm translations trong `messages/`:
+
 - `messages/en.json` - English
 - `messages/vi.json` - Vietnamese
 
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
+
 ```bash
 npm install -g vercel
 vercel
 ```
 
 ### Other Platforms
+
 - Build: `npm run build`
 - Start: `npm start`
 - Port: 3000 (default)
@@ -186,16 +200,19 @@ vercel
 ## 🐛 Troubleshooting
 
 ### Camera not working
+
 - Ensure HTTPS in production
 - Check browser permissions
 - Test on real device
 
 ### AR not loading
+
 - Check A-Frame and AR.js scripts
 - Verify marker images are accessible
 - Check browser console for errors
 
 ### i18n not working
+
 - Ensure middleware is configured
 - Check locale in URL
 - Verify messages files exist
@@ -203,4 +220,3 @@ vercel
 ## 📄 License
 
 MIT
-

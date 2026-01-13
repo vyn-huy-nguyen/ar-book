@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "AR Book",
-    "subtitle": "Scan QR code to view AR videos"
+    "subtitle": "Point camera at book pages to view AR content"
   },
   "language": {
     "select": "Select Language",
@@ -9,11 +9,11 @@
     "vietnamese": "Vietnamese"
   },
   "qr": {
-    "scanning": "Start Scanning QR Code",
-    "instructions": "Point your camera at the QR code on the book page",
-    "success": "QR Code scanned successfully!",
-    "error": "Failed to scan QR code. Please try again.",
-    "notFound": "Page not found. Please scan a valid QR code."
+    "scanning": "Start AR Experience",
+    "instructions": "Point your camera at the marker images on the book pages",
+    "success": "Marker detected successfully!",
+    "error": "Failed to detect marker. Please try again.",
+    "notFound": "Page not found. Please scan a valid marker."
   },
   "ar": {
     "loading": "Loading AR experience...",
@@ -36,7 +36,7 @@
   "navigation": {
     "back": "Back",
     "home": "Home",
-    "scanNew": "Scan New QR Code"
+    "scanNew": "Scan New Marker"
   },
   "errors": {
     "cameraPermission": "Camera permission denied.",
