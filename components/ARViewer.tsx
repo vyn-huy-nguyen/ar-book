@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import Script from 'next/script';
 import { Button, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useTranslations, useLocale } from 'next-intl';
@@ -56,7 +55,23 @@ export default function ARViewer({ onBack }: ARViewerProps) {
     onBack();
   };
 
-  // Initialize AR events after scripts load
+  // Initialize AR events after checking scripts globally
+  useEffect(() => {
+    // Check if scripts are already loaded globally
+    if (window.AFRAME && window.MINDAR) {
+      setScriptsLoaded({ aframe: true, mindar: true });
+    } else {
+      // Fallback: wait a bit if scripts are still initializing
+      const checkScripts = setInterval(() => {
+        if (window.AFRAME && window.MINDAR) {
+          setScriptsLoaded({ aframe: true, mindar: true });
+          clearInterval(checkScripts);
+        }
+      }, 100);
+      return () => clearInterval(checkScripts);
+    }
+  }, []);
+
   useEffect(() => {
     if (scriptsLoaded.aframe && scriptsLoaded.mindar && containerRef.current) {
       setupEvents();
@@ -206,21 +221,6 @@ export default function ARViewer({ onBack }: ARViewerProps) {
 
   return (
     <>
-      <Script
-        src="https://aframe.io/releases/1.5.0/aframe.min.js"
-        strategy="afterInteractive"
-        onLoad={() => setScriptsLoaded((prev) => ({ ...prev, aframe: true }))}
-      />
-      <Script
-        src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"
-        strategy="afterInteractive"
-      />
-      <Script
-        src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"
-        strategy="afterInteractive"
-        onLoad={() => setScriptsLoaded((prev) => ({ ...prev, mindar: true }))}
-      />
-
       {/* Force A-Frame Canvas Visibility */}
       <style jsx global>{`
         .a-canvas {
