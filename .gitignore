@@ -7,8 +7,9 @@ node_modules/
 /coverage
 
 # Next.js
-/.next/
-/out/
+.next/cache
+!.next/standalone
+!.next/static
 
 # Production
 /build
