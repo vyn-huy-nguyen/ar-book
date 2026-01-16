@@ -20,6 +20,7 @@ declare global {
       'a-cylinder': any;
       'a-sky': any;
       'a-text': any;
+      'a-image': any;
     }
   }
 }

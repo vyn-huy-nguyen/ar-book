@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Button, Spin } from 'antd';
+import { Button, Spin, Tooltip } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useTranslations, useLocale } from 'next-intl';
 import { pagesConfig } from '@/config/pages';
@@ -25,6 +25,7 @@ export default function ARViewer({ onBack }: ARViewerProps) {
   // Refs for media
   const audioRefs = useRef<Record<number, HTMLAudioElement | null>>({});
   const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
+  const avatarRefs = useRef<Record<number, HTMLVideoElement | null>>({});
 
   // Cleanup function to stop AR and Audio when unmounting
   useEffect(() => {
@@ -41,11 +42,31 @@ export default function ARViewer({ onBack }: ARViewerProps) {
   }, []);
 
   const stopAR = () => {
+    // 1. Stop Camera tracks
     const video = document.querySelector('video');
     if (video) {
       const stream = video.srcObject as MediaStream;
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
+      }
+      video.remove();
+    }
+
+    // 2. Remove MindAR specifically generated elements from body
+    document.querySelectorAll('.mindar-ui-overlay').forEach((el) => el.remove());
+    document.querySelectorAll('video[style*="position: fixed"]').forEach((el) => el.remove());
+
+    // 3. Restore body styles that MindAR/A-Frame might have changed
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.documentElement.style.overflow = '';
+
+    // 4. Pause A-Frame scene
+    const scene = document.querySelector('a-scene');
+    if (scene) {
+      (scene as any).pause();
+      if ((scene as any).renderer) {
+        (scene as any).renderer.dispose();
       }
     }
   };
@@ -103,6 +124,7 @@ export default function ARViewer({ onBack }: ARViewerProps) {
     allPages.forEach((p) => {
       const v = videoRefs.current[p.pageId];
       const a = audioRefs.current[p.pageId];
+      const av = avatarRefs.current[p.pageId];
       const isActive = activePageId === p.pageId && trackingStatus === 'found';
 
       if (v) {
@@ -114,6 +136,15 @@ export default function ARViewer({ onBack }: ARViewerProps) {
         } else {
           if (!v.paused) v.pause();
           v.muted = true;
+        }
+      }
+      if (av) {
+        if (isActive && isPlaying) {
+          // Avatars are always muted (they follow audio/main video)
+          if (!av.muted) av.muted = true;
+          if (av.paused) av.play().catch(() => {});
+        } else {
+          if (!av.paused) av.pause();
         }
       }
       if (a) {
@@ -156,8 +187,10 @@ export default function ARViewer({ onBack }: ARViewerProps) {
           allPages.forEach((p) => {
             const v = videoRefs.current[p.pageId];
             const a = audioRefs.current[p.pageId];
+            const av = avatarRefs.current[p.pageId];
             if (v) v.currentTime = 0;
             if (a) a.currentTime = 0;
+            if (av) av.currentTime = 0;
           });
         }
 
@@ -180,6 +213,7 @@ export default function ARViewer({ onBack }: ARViewerProps) {
       const promises = allPages.map((p) => {
         const v = videoRefs.current[p.pageId];
         const a = audioRefs.current[p.pageId];
+        const av = avatarRefs.current[p.pageId];
         const mediaPromises = [];
 
         if (v) {
@@ -188,6 +222,15 @@ export default function ARViewer({ onBack }: ARViewerProps) {
             v
               .play()
               .then(() => v.pause())
+              .catch(() => {})
+          );
+        }
+        if (av) {
+          av.muted = true;
+          mediaPromises.push(
+            av
+              .play()
+              .then(() => av.pause())
               .catch(() => {})
           );
         }
@@ -285,6 +328,30 @@ export default function ARViewer({ onBack }: ARViewerProps) {
                     />
                   )}
 
+                  {/* Render avatar video if page has avatarVideo */}
+                  {page.avatarVideo && (
+                    <video
+                      id={`avatar-${page.pageId}`}
+                      src={page.avatarVideo}
+                      style={{
+                        position: 'fixed',
+                        top: '-10000px',
+                        left: 0,
+                        width: '300px',
+                        height: '300px',
+                      }}
+                      loop
+                      crossOrigin="anonymous"
+                      playsInline
+                      preload="auto"
+                      muted
+                      ref={(el) => {
+                        avatarRefs.current[page.pageId] = el;
+                        if (el) el.setAttribute('webkit-playsinline', 'true');
+                      }}
+                    />
+                  )}
+
                   {/* Render audio if page has audio */}
                   {audioUrl && (
                     <audio
@@ -333,6 +400,24 @@ export default function ARViewer({ onBack }: ARViewerProps) {
                       rotation="90 0 0"
                       animation-mixer
                     ></a-gltf-model>
+                  ) : page.customImage ? (
+                    <a-image
+                      src={page.customImage}
+                      width="1"
+                      height="0.75"
+                      position="0 0.8 0.1"
+                      rotation="0 0 0"
+                      material="transparent: true; alphaTest: 0.5;"
+                    ></a-image>
+                  ) : page.avatarVideo ? (
+                    <a-video
+                      src={`#avatar-${page.pageId}`}
+                      width="0.6"
+                      height="0.6"
+                      position="0 0.6 0.1"
+                      rotation="0 0 0"
+                      material="side: double; transparent: true; opacity: 1;"
+                    ></a-video>
                   ) : page.videos ? (
                     // CHANGE 1: Only render video plane if page indeed has videos
                     // If page has only audio, this part will be skipped, showing nothing (transparent)
@@ -367,26 +452,35 @@ export default function ARViewer({ onBack }: ARViewerProps) {
             >
               {isPlaying ? '⏸️' : '▶️'}
             </Button>
-            <Button
-              shape="circle"
-              size="large"
-              onClick={toggleMute}
-              className="flex h-12 w-12 items-center justify-center border-none bg-white/80 text-xl shadow-lg backdrop-blur"
+            <Tooltip
+              title={isMuted ? (locale === 'vi' ? 'Bật tiếng tại đây' : 'Tap to unmute') : ''}
+              open={isMuted && isPlaying}
+              placement="topRight"
+              color="#108ee9"
             >
-              {isMuted ? '🔇' : '🔊'}
-            </Button>
+              <Button
+                shape="circle"
+                size="large"
+                onClick={toggleMute}
+                className="flex h-12 w-12 items-center justify-center border-none bg-white/80 text-xl shadow-lg backdrop-blur"
+              >
+                {isMuted ? '🔇' : '🔊'}
+              </Button>
+            </Tooltip>
           </div>
         )}
 
-        {/* Status Bar */}
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/70 to-transparent p-4 pb-8">
-          <p className="text-center text-sm text-white drop-shadow-lg">
-            {trackingStatus === 'found'
-              ? t('ar.trackingFound')
-              : trackingStatus === 'lost'
-                ? t('ar.trackingLost')
-                : t('ar.tracking')}
-          </p>
+        {/* Status Bar - Moved to Top */}
+        <div className="pointer-events-none absolute left-0 right-0 top-20 z-40 flex justify-center">
+          <div className="rounded-full bg-black/40 px-4 py-2 backdrop-blur-sm">
+            <p className="mb-0 mt-0 text-center text-sm text-white drop-shadow-lg">
+              {trackingStatus === 'found'
+                ? t('ar.trackingFound')
+                : trackingStatus === 'lost'
+                  ? t('ar.trackingLost')
+                  : t('ar.tracking')}
+            </p>
+          </div>
         </div>
       </div>
     </>

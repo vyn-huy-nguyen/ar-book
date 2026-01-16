@@ -20,6 +20,8 @@ export interface PageConfig {
     en: string;
     vi: string;
   };
+  customImage?: string;
+  avatarVideo?: string;
 }
 
 export const pagesConfig: Record<number, PageConfig> = {
@@ -40,6 +42,7 @@ export const pagesConfig: Record<number, PageConfig> = {
     pageId: 2,
     markerImage: '/markers/page2-marker.jpg',
     targetIndex: 1,
+    // avatarVideo: '/videos/page2-video-avatar.mp4',
     // Temporarily disabled model for testing
     // model:
     //   'https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/softmind/scene.gltf',

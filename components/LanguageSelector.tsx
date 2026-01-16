@@ -11,6 +11,9 @@ export default function LanguageSelector() {
   const pathname = usePathname();
 
   const handleLanguageChange = (newLocale: string) => {
+    // Set flag so LanguageModal knows we just switched and doesn't reappear
+    sessionStorage.setItem('just_switched_language', 'true');
+
     // Remove current locale from pathname
     const pathWithoutLocale = pathname.replace(`/${locale}`, '');
     // Navigate to new locale
@@ -39,4 +42,3 @@ export default function LanguageSelector() {
     </Space>
   );
 }
-

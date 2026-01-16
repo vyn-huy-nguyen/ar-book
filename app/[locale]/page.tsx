@@ -7,6 +7,7 @@ import { ScanOutlined, GlobalOutlined } from '@ant-design/icons';
 import Script from 'next/script';
 import LanguageSelector from '@/components/LanguageSelector';
 import ARViewer from '@/components/ARViewer';
+import LanguageModal from '@/components/LanguageModal';
 
 const { Title, Paragraph } = Typography;
 
@@ -20,7 +21,6 @@ export default function HomePage() {
 
   const handleBack = () => {
     setCurrentScreen('home');
-    window.location.reload();
   };
 
   return (
@@ -35,6 +35,8 @@ export default function HomePage() {
         src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"
         strategy="afterInteractive"
       />
+
+      <LanguageModal />
 
       {currentScreen === 'ar' ? (
         <ARViewer onBack={handleBack} />
