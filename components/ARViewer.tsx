@@ -365,9 +365,9 @@ export default function ARViewer({ onBack }: ARViewerProps) {
                   ) : page.videos ? (
                     <a-video
                       src={`#video-${page.pageId}`}
-                      width="0.9"
-                      height="0.5"
-                      position="0 0.6 0.1"
+                      width="1"
+                      height="0.5625"
+                      position="0 0 0.1"
                       rotation="0 0 0"
                       material="side: double; transparent: true; opacity: 1;"
                     ></a-video>
