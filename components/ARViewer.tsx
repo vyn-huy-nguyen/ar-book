@@ -412,8 +412,8 @@ export default function ARViewer({ onBack }: ARViewerProps) {
                   ) : page.avatarVideo ? (
                     <a-video
                       src={`#avatar-${page.pageId}`}
-                      width="0.6"
-                      height="0.6"
+                      width="0.9"
+                      height="0.5"
                       position="0 0.6 0.1"
                       rotation="0 0 0"
                       material="side: double; transparent: true; opacity: 1;"
