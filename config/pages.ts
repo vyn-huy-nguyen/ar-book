@@ -42,13 +42,17 @@ export const pagesConfig: Record<number, PageConfig> = {
     pageId: 2,
     markerImage: '/markers/page2-marker.jpg',
     targetIndex: 1,
-    avatarVideo: '/videos/page2-video-avatar.mp4',
+    // avatarVideo: '/videos/page2-video-avatar.mp4',
     // Temporarily disabled model for testing
     // model:
     //   'https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/softmind/scene.gltf',
     audio: {
       en: '/audio/page2-audio-en.mp3',
       vi: '/audio/page2-audio-vi.mp3',
+    },
+    videos: {
+      en: '/videos/page2-video-avatar.mp4',
+      vi: '/videos/page2-video-avatar.mp4',
     },
     title: {
       en: 'Page 2 - Chapter One',
