@@ -25,7 +25,6 @@ export default function ARViewer({ onBack }: ARViewerProps) {
   // Refs for media
   const audioRefs = useRef<Record<number, HTMLAudioElement | null>>({});
   const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
-  const avatarRefs = useRef<Record<number, HTMLVideoElement | null>>({});
 
   // Cleanup function to stop AR and Audio when unmounting
   useEffect(() => {
@@ -124,13 +123,12 @@ export default function ARViewer({ onBack }: ARViewerProps) {
     allPages.forEach((p) => {
       const v = videoRefs.current[p.pageId];
       const a = audioRefs.current[p.pageId];
-      const av = avatarRefs.current[p.pageId];
       const isActive = activePageId === p.pageId && trackingStatus === 'found';
 
       if (v) {
         if (isActive && isPlaying) {
-          // Play immediately (visuals), but enforce mute if not unlocked yet
-          const shouldBeMuted = !isAudioUnlocked || isMuted;
+          // Play visuals. Mute if there is a separate audio track.
+          const shouldBeMuted = !!a || !isAudioUnlocked || isMuted;
           if (v.muted !== shouldBeMuted) v.muted = shouldBeMuted;
           if (v.paused) v.play().catch(() => {});
         } else {
@@ -138,18 +136,9 @@ export default function ARViewer({ onBack }: ARViewerProps) {
           v.muted = true;
         }
       }
-      if (av) {
-        if (isActive && isPlaying) {
-          // Avatars are always muted (they follow audio/main video)
-          if (!av.muted) av.muted = true;
-          if (av.paused) av.play().catch(() => {});
-        } else {
-          if (!av.paused) av.pause();
-        }
-      }
       if (a) {
-        // Audio respects the same logic but visuals-priority: only play if no video
-        if (isActive && isPlaying && !v) {
+        // Audio respects the same logic. Priority for sound if video is present.
+        if (isActive && isPlaying) {
           const shouldBeMuted = !isAudioUnlocked || isMuted;
           if (a.muted !== shouldBeMuted) a.muted = shouldBeMuted;
           if (a.paused) a.play().catch(() => {});
@@ -187,10 +176,8 @@ export default function ARViewer({ onBack }: ARViewerProps) {
           allPages.forEach((p) => {
             const v = videoRefs.current[p.pageId];
             const a = audioRefs.current[p.pageId];
-            const av = avatarRefs.current[p.pageId];
             if (v) v.currentTime = 0;
             if (a) a.currentTime = 0;
-            if (av) av.currentTime = 0;
           });
         }
 
@@ -213,7 +200,6 @@ export default function ARViewer({ onBack }: ARViewerProps) {
       const promises = allPages.map((p) => {
         const v = videoRefs.current[p.pageId];
         const a = audioRefs.current[p.pageId];
-        const av = avatarRefs.current[p.pageId];
         const mediaPromises = [];
 
         if (v) {
@@ -222,15 +208,6 @@ export default function ARViewer({ onBack }: ARViewerProps) {
             v
               .play()
               .then(() => v.pause())
-              .catch(() => {})
-          );
-        }
-        if (av) {
-          av.muted = true;
-          mediaPromises.push(
-            av
-              .play()
-              .then(() => av.pause())
               .catch(() => {})
           );
         }
@@ -328,30 +305,6 @@ export default function ARViewer({ onBack }: ARViewerProps) {
                     />
                   )}
 
-                  {/* Render avatar video if page has avatarVideo */}
-                  {page.avatarVideo && (
-                    <video
-                      id={`avatar-${page.pageId}`}
-                      src={page.avatarVideo}
-                      style={{
-                        position: 'fixed',
-                        top: '-10000px',
-                        left: 0,
-                        width: '300px',
-                        height: '300px',
-                      }}
-                      loop
-                      crossOrigin="anonymous"
-                      playsInline
-                      preload="auto"
-                      muted
-                      ref={(el) => {
-                        avatarRefs.current[page.pageId] = el;
-                        if (el) el.setAttribute('webkit-playsinline', 'true');
-                      }}
-                    />
-                  )}
-
                   {/* Render audio if page has audio */}
                   {audioUrl && (
                     <audio
@@ -409,23 +362,12 @@ export default function ARViewer({ onBack }: ARViewerProps) {
                       rotation="0 0 0"
                       material="transparent: true; alphaTest: 0.5;"
                     ></a-image>
-                  ) : page.avatarVideo ? (
+                  ) : page.videos ? (
                     <a-video
-                      src={`#avatar-${page.pageId}`}
+                      src={`#video-${page.pageId}`}
                       width="0.9"
                       height="0.5"
                       position="0 0.6 0.1"
-                      rotation="0 0 0"
-                      material="side: double; transparent: true; opacity: 1;"
-                    ></a-video>
-                  ) : page.videos ? (
-                    // CHANGE 1: Only render video plane if page indeed has videos
-                    // If page has only audio, this part will be skipped, showing nothing (transparent)
-                    <a-video
-                      src={`#video-${page.pageId}`}
-                      width="1"
-                      height="0.5625"
-                      position="0 0 0.1"
                       rotation="0 0 0"
                       material="side: double; transparent: true; opacity: 1;"
                     ></a-video>
